@@ -36,3 +36,7 @@ asyncsolutions
 backend
 backend base async
 config.py
+
+.dockerignore
+as_complemed
+asynciosoltions

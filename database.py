@@ -2,7 +2,6 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.orm import DeclarativeBase
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# 1. Настройки
 class Settings(BaseSettings):
     DB_HOST: str = "127.0.0.1"
     DB_PORT: int = 5432
@@ -18,11 +17,9 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-# 2. Движок и Сессии
 engine = create_async_engine(settings.DATABASE_URL, echo=False)
 async_session = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
-# 3. Базовый класс (без него таблица в main.py не создастся)
 class Base(DeclarativeBase):
     pass
 
