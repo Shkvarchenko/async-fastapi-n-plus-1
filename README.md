@@ -13,7 +13,7 @@ This project demonstrates modern backend development best practices, including a
 * **Framework:** FastAPI
 * **Database:** PostgreSQL 15
 * **ORM:** SQLAlchemy 2.0 (Async)
-* **Security:** JWT (python-jose), Bcrypt (passlib)
+* **Security:** JWT (python-jose), Password Hashing (passlib + pbkdf2_sha256)
 * **Containerization:** Docker & Docker Compose
 * **Validation:** Pydantic v2
 * **Driver:** asyncpg
@@ -21,18 +21,18 @@ This project demonstrates modern backend development best practices, including a
 ## ✨ Key Features / Ключевые особенности
 
 * **100% Asynchronous:** Uses `AsyncSession` and `async/await` for non-blocking I/O operations.
-* **JWT Authentication:** Secure user registration and login. Passwords are hashed with `bcrypt`. Sensitive routes (like creating products) are protected using OAuth2 password flow.
-* **Clean Architecture:** Separated database configuration, models, schemas, and routers using `APIRouter`.
+* **JWT Authentication:** Secure user registration and login. Passwords are securely hashed. Sensitive routes (like creating products) are protected using OAuth2 password flow.
+* **Clean Architecture:** Separated database configuration, models, schemas, and routers using `APIRouter`. Dependencies (like `get_current_user`) are isolated.
 * **Dockerized Environment:** Includes a `docker-compose.yml` with a PostgreSQL `healthcheck` to ensure the web app starts only when the database is fully ready.
 * **N+1 Problem Solution:** Includes specific endpoints (`/products/bad` vs `/products/good`) to demonstrate how to optimize database queries using `selectinload`.
 * **UUIDs as Primary Keys:** Uses UUIDv4 for product IDs to improve scalability and security.
 
 * **100% Асинхронность:** Используются `AsyncSession` и `async/await` для неблокирующих операций ввода-вывода.
-* **JWT Аутентификация:** Безопасная регистрация и вход пользователей. Пароли хешируются с помощью `bcrypt`. Защищенные роуты (например, создание товара) требуют OAuth2 токен.
-* **Чистая архитектура:** Конфигурация БД, модели, схемы и роуты разделены по файлам с использованием `APIRouter`.
-* **Docker-окружение:** В `docker-compose.yml` настроен `healthcheck` для PostgreSQL, чтобы веб-приложение запускалось только после полной готовности базы данных.
-* **Решение проблемы N+1:** В проекте есть специальные эндпоинты (`/products/bad` и `/products/good`), которые демонстрируют, как оптимизировать запросы к базе данных с помощью `selectinload`.
-* **UUID в качестве первичных ключей:** Для ID товаров используются UUIDv4 для улучшения масштабируемости и безопасности.
+* **JWT Аутентификация:** Безопасная регистрация и вход. Пароли надежно хэшируются. Защищенные роуты (например, создание товара) требуют OAuth2 токен.
+* **Чистая архитектура:** Конфигурация БД, модели, схемы и роуты разделены. Зависимости (вроде `get_current_user`) вынесены отдельно.
+* **Docker-окружение:** В `docker-compose.yml` настроен `healthcheck` для PostgreSQL, чтобы приложение запускалось после полной готовности базы.
+* **Решение проблемы N+1:** Специальные эндпоинты (`/products/bad` и `/products/good`) демонстрируют оптимизацию запросов с помощью `selectinload`.
+* **UUID первичные ключи:** Для ID товаров используются UUIDv4.
 
 ## 🚀 How to Run / Как запустить локально
 
@@ -51,6 +51,7 @@ This project demonstrates modern backend development best practices, including a
    ```bash
    cp .env.example .env
    ```
+   *Make sure to set your own `SECRET_KEY` in `.env`! / Обязательно сгенерируйте свой `SECRET_KEY` в `.env`!*
 
 3. Start the containers / Запустите контейнеры:
    ```bash
@@ -79,9 +80,9 @@ docker exec -it fastapi-app python seed.py
 ### Products CRUD / CRUD для товаров
 * `GET /products/items` — Get a list of all products / Получить список всех товаров.
 * `POST /products/items` 🔒 — Create a new product (Requires Auth) / Создать новый товар (Требуется авторизация).
-* `PATCH /products/items/{item_id}` — Partially update a product / Частично обновить товар.
-* `PUT /products/items/{item_id}` — Fully replace a product / Полностью заменить товар.
-* `DELETE /products/items/{item_id}` — Delete a product / Удалить товар.
+* `PATCH /products/items/{item_id}` 🔒 — Partially update a product (Requires Auth) / Частично обновить товар.
+* `PUT /products/items/{item_id}` 🔒 — Fully replace a product (Requires Auth) / Полностью заменить товар.
+* `DELETE /products/items/{item_id}` 🔒 — Delete a product (Requires Auth) / Удалить товар.
 
 ### N+1 Query Demonstration / Демонстрация проблемы N+1
 * `GET /products/bad` — Fetches data using the **inefficient way** (1 query + N queries). Check logs using `docker logs fastapi-app`.
