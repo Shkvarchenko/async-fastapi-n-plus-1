@@ -4,10 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from uuid import UUID
 from database import get_db
-from models import Product, Review
+from models import Product, Review, User
 from schemas import CreateItem, UpdateItem, ItemSchema
+from dependencies import get_current_user
 
-# Создаем роутер с префиксом и тегом
 router = APIRouter(prefix="/products", tags=["Products"])
 
 @router.get("/items", response_model=list[ItemSchema])
@@ -16,8 +16,16 @@ async def get_all_items(db: AsyncSession = Depends(get_db)):
     return result.scalars().all()
 
 @router.post("/items", response_model=ItemSchema, status_code=status.HTTP_201_CREATED)
-async def create_item(payload: CreateItem, db: AsyncSession = Depends(get_db)):
-    new_item = Product(name=payload.name, price=payload.price, stock=payload.stock)
+async def create_item(
+    payload: CreateItem, 
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    new_item = Product(
+        name=payload.name,
+        price=payload.price,
+        stock=payload.stock
+    )
     db.add(new_item)
     await db.commit()
     await db.refresh(new_item)
@@ -29,9 +37,12 @@ async def update_item(item_id: UUID, payload: UpdateItem, db: AsyncSession = Dep
     if not product:
         raise HTTPException(status_code=404, detail="item_not_found")
         
-    if payload.name is not None: product.name = payload.name
-    if payload.price is not None: product.price = payload.price
-    if payload.stock is not None: product.stock = payload.stock
+    if payload.name is not None:
+        product.name = payload.name
+    if payload.price is not None:
+        product.price = payload.price
+    if payload.stock is not None:
+        product.stock = payload.stock
         
     await db.commit()
     await db.refresh(product)

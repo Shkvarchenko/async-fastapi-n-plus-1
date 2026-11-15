@@ -1,9 +1,17 @@
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import String, ForeignKey, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from uuid import UUID
 import uuid
 from database import Base
 
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    hashed_password: Mapped[str] = mapped_column(String(255))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    
 class Product(Base):
     __tablename__ = "products"
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
