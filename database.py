@@ -8,6 +8,11 @@ class Settings(BaseSettings):
     DB_USER: str = "postgres"
     DB_PASS: str = ""
     DB_NAME: str = "dota_db"
+    SECRET_KEY: str = "change_me_in_production"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    
+    
 
     @property
     def DATABASE_URL(self) -> str:
