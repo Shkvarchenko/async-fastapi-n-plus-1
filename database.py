@@ -22,8 +22,6 @@ async_session = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_c
 
 class Base(DeclarativeBase):
     pass
-
-# 4. Зависимость
 async def get_db():
     async with async_session() as session:
         yield session

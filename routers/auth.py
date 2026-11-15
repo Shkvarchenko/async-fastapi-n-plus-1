@@ -27,11 +27,8 @@ async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
 
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
-    # Ищем пользователя по имени
     result = await db.execute(select(User).where(User.username == form_data.username))
     user = result.scalars().first()
-    
-    # Проверяем пароль
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
