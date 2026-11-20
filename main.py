@@ -6,11 +6,9 @@ from routers import products, auth
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("🚀 Starting server. Creating tables...")
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    print("Starting server. Creating tables...")
     yield
-    print("🛑 Shutting down server...")
+    print("Shutting down server...")
     await engine.dispose()
 
 app = FastAPI(lifespan=lifespan)

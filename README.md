@@ -1,18 +1,19 @@
-# 🇬🇧 Async FastAPI Backend with N+1 Demo & JWT Auth / 🇷🇺 Асинхронный бэкенд на FastAPI с N+1 и JWT
+# 🇬🇧 Async FastAPI Backend with N+1 Demo, JWT Auth & Alembic / 🇷🇺 Асинхронный бэкенд на FastAPI с N+1, JWT и Alembic
 
 A robust, fully asynchronous REST API built with **FastAPI**, **SQLAlchemy 2.0**, and **PostgreSQL**. 
 
-This project demonstrates modern backend development best practices, including asynchronous database sessions, secure JWT authentication, Docker containerization with health checks, and a practical comparison of the **N+1 query problem** versus the optimal eager loading approach (`selectinload`).
+This project demonstrates modern backend development best practices, including asynchronous database sessions, secure JWT authentication, database migrations with Alembic, Docker containerization with health checks, and a practical comparison of the **N+1 query problem** versus the optimal eager loading approach (`selectinload`).
 
 Надежный, полностью асинхронный REST API, построенный с использованием **FastAPI**, **SQLAlchemy 2.0** и **PostgreSQL**.
 
-Этот проект демонстрирует лучшие практики современной бэкенд-разработки: асинхронные сессии баз данных, безопасную JWT-аутентификацию, контейнеризацию через Docker с проверкой здоровья (healthcheck), а также наглядное сравнение **проблемы N+1** с оптимальным подходом жадной загрузки (`selectinload`).
+Этот проект демонстрирует лучшие практики современной бэкенд-разработки: асинхронные сессии баз данных, безопасную JWT-аутентификацию, миграции базы данных через Alembic, контейнеризацию через Docker с проверкой здоровья (healthcheck), а также наглядное сравнение **проблемы N+1** с оптимальным подходом жадной загрузки (`selectinload`).
 
 ## 🛠 Tech Stack / Стек технологий
 
 * **Framework:** FastAPI
 * **Database:** PostgreSQL 15
 * **ORM:** SQLAlchemy 2.0 (Async)
+* **Migrations:** Alembic
 * **Security:** JWT (python-jose), Password Hashing (passlib + pbkdf2_sha256)
 * **Containerization:** Docker & Docker Compose
 * **Validation:** Pydantic v2
@@ -22,13 +23,15 @@ This project demonstrates modern backend development best practices, including a
 
 * **100% Asynchronous:** Uses `AsyncSession` and `async/await` for non-blocking I/O operations.
 * **JWT Authentication:** Secure user registration and login. Passwords are securely hashed. Sensitive routes (like creating products) are protected using OAuth2 password flow.
-* **Clean Architecture:** Separated database configuration, models, schemas, and routers using `APIRouter`. Dependencies (like `get_current_user`) are isolated.
+* **Database Migrations:** Uses Alembic to safely evolve the database schema without losing existing data.
+* **Clean Architecture:** Separated database configuration, models, schemas, and routers using `APIRouter`. Dependencies are isolated.
 * **Dockerized Environment:** Includes a `docker-compose.yml` with a PostgreSQL `healthcheck` to ensure the web app starts only when the database is fully ready.
 * **N+1 Problem Solution:** Includes specific endpoints (`/products/bad` vs `/products/good`) to demonstrate how to optimize database queries using `selectinload`.
 * **UUIDs as Primary Keys:** Uses UUIDv4 for product IDs to improve scalability and security.
 
 * **100% Асинхронность:** Используются `AsyncSession` и `async/await` для неблокирующих операций ввода-вывода.
 * **JWT Аутентификация:** Безопасная регистрация и вход. Пароли надежно хэшируются. Защищенные роуты (например, создание товара) требуют OAuth2 токен.
+* **Миграции БД:** Используется Alembic для безопасного изменения структуры базы данных без потери существующих данных.
 * **Чистая архитектура:** Конфигурация БД, модели, схемы и роуты разделены. Зависимости (вроде `get_current_user`) вынесены отдельно.
 * **Docker-окружение:** В `docker-compose.yml` настроен `healthcheck` для PostgreSQL, чтобы приложение запускалось после полной готовности базы.
 * **Решение проблемы N+1:** Специальные эндпоинты (`/products/bad` и `/products/good`) демонстрируют оптимизацию запросов с помощью `selectinload`.
@@ -58,7 +61,12 @@ This project demonstrates modern backend development best practices, including a
    docker compose up -d --build
    ```
 
-4. Access the API / Доступ к API:
+4. Apply database migrations / Примените миграции базы данных:
+   ```bash
+   docker compose exec web alembic upgrade head
+   ```
+
+5. Access the API / Доступ к API:
    The interactive Swagger UI will be available at / Интерактивная документация Swagger доступна по адресу:
    👉 [http://localhost:8000/docs](http://localhost:8000/docs)
 
@@ -95,10 +103,12 @@ docker exec -it fastapi-app python seed.py
 
 ```text
 .
+├── alembic.ini         # Alembic configuration file / Конфигурация Alembic
+├── migrations/         # Database migrations folder / Папка с миграциями
 ├── auth.py             # JWT creation and password hashing / Логика JWT и хеширования паролей
 ├── dependencies.py     # Auth dependencies (get_current_user) / Зависимости авторизации
 ├── database.py         # Async engine, session, settings, and Base / Асинхронный движок, сессии и Base
-├── main.py             # FastAPI app initialization and router connection / Инициализация приложения и роутеров
+├── main.py             # FastAPI app initialization and router connection / Инициализация приложения
 ├── models.py           # SQLAlchemy ORM models (Product, Review, User) / Модели базы данных
 ├── schemas.py          # Pydantic schemas for validation / Схемы Pydantic для валидации
 ├── routers/            # API endpoints separated by modules / Эндпоинты, разделенные по модулям
