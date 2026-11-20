@@ -3,7 +3,6 @@ from database import async_session, engine, Base
 from models import Product, Review
 
 async def seed_data():
-    # Create tables if they don't exist
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
